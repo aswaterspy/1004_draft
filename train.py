@@ -62,7 +62,7 @@ def main(spark, data_file, model_file):
     pip_model = model.bestModel
     pip_model.write().overwrite().save(model_file)
 
-
+    print('Process Finished')
 # Only enter this block if we're in main
 if __name__ == "__main__":
 
