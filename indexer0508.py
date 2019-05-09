@@ -29,7 +29,7 @@ def main(spark, data_file):
     # TODO: YOUR CODE GOES HERE
     ###
     df = spark.read.parquet(data_file)
-    df = df.sample(0.0001)
+    #df = df.sample(0.0001)
     indexer_id = StringIndexer(inputCol="user_id", outputCol="userindex").setHandleInvalid("skip")
     df = indexer_id.fit(df).transform(df)
     indexer_item = StringIndexer(inputCol="track_id", outputCol="itemindex").setHandleInvalid("skip")
