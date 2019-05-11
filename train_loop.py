@@ -30,8 +30,8 @@ def main(spark, train_data_file, test_data_file, model_file):
     training_data = training_data.select('userindex','itemindex','count')
 
     testing_data = spark.read.parquet(test_data_file)
-    testing_data = indexer_id.transform(testing_data)
-    testing_data = indexer_item.transform(testing_data)
+    testing_data = indexer_id.fit(training_data).transform(testing_data)
+    testing_data = indexer_item.fit(training_data).transform(testing_data)
 
     testing_data = testing_data.select('userindex','itemindex','count')
 
