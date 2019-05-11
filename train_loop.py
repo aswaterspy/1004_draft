@@ -70,11 +70,15 @@ if __name__ == "__main__":
     # Create the spark session object
     spark = SparkSession.builder.appName('remommendation_test').getOrCreate()
 
-    # And the location to store the trained model
-    model_file = sys.argv[1]
+    # train data input
+    train_data_file = sys.argv[1]
 
-    # Get the filename from the command line
-    data_file = sys.argv[2]
+    # test data input
+    test_data_file = sys.argv[2]
+
+    # model output
+    model_file = sys.argv[3]
+
 
     # Call our main routine
     main(spark, train_data_file, test_data_file, model_file)
