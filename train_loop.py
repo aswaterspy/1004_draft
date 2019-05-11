@@ -14,7 +14,7 @@ from pyspark.sql import SparkSession
 from pyspark.ml.feature import StringIndexer
 from pyspark.ml.recommendation import ALS
 from pyspark.mllib.evaluation import RankingMetrics
-from pyspark.sql.function import expr
+from pyspark.sql.functions import expr
 # TODO: you may need to add imports here
 
 
