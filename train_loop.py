@@ -23,16 +23,19 @@ def main(spark, train_data_file, test_data_file, model_file):
 
     training_data = spark.read.parquet(train_data_file)
     training_data = training_data.sample(False,0.1) 
+
     indexer_id = StringIndexer(inputCol="user_id", outputCol="userindex").setHandleInvalid("skip")
-    training_data = indexer_id.fit(training_data).transform(training_data)
+    indexer_id_model = indexer_id.fit(training_data)
     indexer_item = StringIndexer(inputCol="track_id", outputCol="itemindex").setHandleInvalid("skip")
-    training_data = indexer_item.fit(training_data).transform(training_data)
+    indexer_item_model = indexer_item.fit(training_data)
+
+    training_data = indexer_id_model.transform(training_data)
+    training_data = indexer_item_model.transform(training_data)
     training_data = training_data.select('userindex','itemindex','count')
 
     testing_data = spark.read.parquet(test_data_file)
-    testing_data = indexer_id.fit(training_data).transform(testing_data)
-    testing_data = indexer_item.fit(training_data).transform(testing_data)
-
+    testing_data = indexer_id_model.transform(testing_data)
+    testing_data = indexer_item_model.transform(testing_data)
     testing_data = testing_data.select('userindex','itemindex','count')
 
     result_dict = {}
