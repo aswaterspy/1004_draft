@@ -30,30 +30,31 @@ def main(spark, train_data_file, test_data_file, model_file):
     indexer_item = StringIndexer(inputCol="track_id", outputCol="itemindex").setHandleInvalid("skip")
     indexer_item_model = indexer_item.fit(training_data)
 
+    training_data = indexer_id_model.transform(training_data)
+    training_data = indexer_item_model.transform(training_data)
+
+    testing_data = spark.read.parquet(test_data_file)
+    testing_data = indexer_id_model.transform(testing_data)
+    testing_data = indexer_item_model.transform(testing_data)
+    print('Finished Indexing!')
+    time_b = time.time()
+    print(time_a - time_b)
+    time_a = time_b
+
     #make sure the partial history 110k users are in sample
     training_data.createOrReplaceTempView('training_data')
     partial_history_rows = spark.sql("SELECT * FROM training_data WHERE user_id IN (SELECT user_id FROM training_data GROUP BY user_id ORDER BY max(__index_level_0__) DESC LIMIT 110000)")
     
     #full_history_rows = training_data.subtract(partial_history_rows)
     #full_history_rows = full_history_rows.sample(False, 0.02)
-    training_data = partial_history_rows.sample(0.01)#.union(full_history_rows) 
+    training_data = partial_history_rows.sample(0.1)#.union(full_history_rows)
     print('Finished Sampling!')
     time_b = time.time()
     print(time_a - time_b)
     time_a = time_b
 
-    training_data = indexer_id_model.transform(training_data)
-    training_data = indexer_item_model.transform(training_data)
     training_data = training_data.select('userindex','itemindex','count')
-
-    testing_data = spark.read.parquet(test_data_file)
-    testing_data = indexer_id_model.transform(testing_data)
-    testing_data = indexer_item_model.transform(testing_data)
     testing_data = testing_data.select('userindex','itemindex','count')
-    print('Finished Indexing!')
-    time_b = time.time()
-    print(time_a - time_b)
-    time_a = time_b
 
     result_dict = {}
     rank_list = [10]
@@ -72,9 +73,13 @@ def main(spark, train_data_file, test_data_file, model_file):
                 time_a = time_b
 
                 prediction = model.recommendForAllUsers(500).select('userindex', 'recommendations.itemindex')
-                
+                prediction.show(5)
+
                 testing_df = testing_data.groupBy('userindex').agg(expr('collect_list(itemindex) as item_list'))
+                testing_df.show(5)
+
                 predictionAndLabels = prediction.join(testing_df, 'userindex')
+                predictionAndLabels.show(5)
                 print('Joined Prediction and Labels!')
                 time_b = time.time()
                 print(time_a - time_b)
