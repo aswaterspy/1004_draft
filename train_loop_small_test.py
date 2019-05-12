@@ -47,7 +47,7 @@ def main(spark, train_data_file, test_data_file, model_file):
     
     #full_history_rows = training_data.subtract(partial_history_rows)
     #full_history_rows = full_history_rows.sample(False, 0.02)
-    training_data = partial_history_rows.sample(0.1)#.union(full_history_rows)
+    training_data = partial_history_rows#.union(full_history_rows)
     print('Finished Sampling!')
     time_b = time.time()
     print(time_a - time_b)
@@ -111,7 +111,7 @@ def main(spark, train_data_file, test_data_file, model_file):
 if __name__ == "__main__":
 
     # Create the spark session object
-    spark = SparkSession.builder.appName('remommendation_test').getOrCreate()
+    spark = SparkSession.builder.appName('remommendation_test').config("spark.sql.broadcastTimeout","36000").getOrCreate()
 
     # train data input
     train_data_file = sys.argv[1]
