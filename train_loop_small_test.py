@@ -25,9 +25,13 @@ def main(spark, train_data_file, test_data_file, model_file):
     start = time_a
 
     training_data = spark.read.parquet(train_data_file)
-    training_data.createOrReplaceTempView('training_data')
+    indexer_id = StringIndexer(inputCol="user_id", outputCol="userindex").setHandleInvalid("skip")
+    indexer_id_model = indexer_id.fit(training_data)
+    indexer_item = StringIndexer(inputCol="track_id", outputCol="itemindex").setHandleInvalid("skip")
+    indexer_item_model = indexer_item.fit(training_data)
 
     #make sure the partial history 110k users are in sample
+    training_data.createOrReplaceTempView('training_data')
     partial_history_rows = spark.sql("SELECT * FROM training_data WHERE user_id IN (SELECT user_id FROM training_data GROUP BY user_id ORDER BY max(__index_level_0__) DESC LIMIT 110000)")
     
     #full_history_rows = training_data.subtract(partial_history_rows)
@@ -37,11 +41,6 @@ def main(spark, train_data_file, test_data_file, model_file):
     time_b = time.time()
     print(time_a - time_b)
     time_a = time_b
-
-    indexer_id = StringIndexer(inputCol="user_id", outputCol="userindex").setHandleInvalid("skip")
-    indexer_id_model = indexer_id.fit(training_data)
-    indexer_item = StringIndexer(inputCol="track_id", outputCol="itemindex").setHandleInvalid("skip")
-    indexer_item_model = indexer_item.fit(training_data)
 
     training_data = indexer_id_model.transform(training_data)
     training_data = indexer_item_model.transform(training_data)
@@ -80,6 +79,7 @@ def main(spark, train_data_file, test_data_file, model_file):
                 time_b = time.time()
                 print(time_a - time_b)
                 time_a = time_b
+
                 pred_df = predictionAndLabels.select(['itemindex','item_list']).rdd.map(list)
 
                 metrics = RankingMetrics(pred_df)
