@@ -22,7 +22,14 @@ def main(spark, train_data_file, test_data_file, model_file):
 
 
     training_data = spark.read.parquet(train_data_file)
-    training_data = training_data.sample(False,0.1) 
+    training_data.createOrReplaceTempView('training_data')
+
+    #make sure the partial history 110k users are in sample
+    partial_history_rows = spark.sql("SELECT * FROM training_data WHERE user_id IN (SELECT user_id FROM training_data GROUP BY user_id ORDER BY max(__index_level_0__) DESC LIMIT 110000)")
+    
+    #full_history_rows = training_data.subtract(partial_history_rows)
+    #full_history_rows = full_history_rows.sample(False, 0.02)
+    training_data = partial_history_rows#.union(full_history_rows) 
 
     indexer_id = StringIndexer(inputCol="user_id", outputCol="userindex").setHandleInvalid("skip")
     indexer_id_model = indexer_id.fit(training_data)
