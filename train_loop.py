@@ -79,39 +79,41 @@ def main(spark, train_data_file, test_data_file, model_file):
                 time_a = time_b
 
                 prediction = model.recommendForAllUsers(500).select('userindex', 'recommendations.itemindex')
-                prediction.show(5)
+                print('Finished Prediction DF!')
 
                 testing_df = testing_data.groupBy('userindex').agg(expr('collect_list(itemindex) as item_list'))
-                testing_df.show(5)
+                print('Finished Label DF!')
 
                 predictionAndLabels = prediction.join(testing_df, 'userindex')
-                predictionAndLabels.show(5)
+                predandlabel_name = 'rk'+str(rank)+'reg'+str(reg_param)+'a'+str(alpha)
+                predandlabel_name = predandlabel_name.replace(".","")+'.parquet'
+                predictionAndLabels.write.parquet(predandlabel_name)
 
                 print('Joined Prediction and Labels!')
                 time_b = time.time()
                 print(time_b - time_a)
                 time_a = time_b
+                
+    #             pred_df = predictionAndLabels.select(['itemindex','item_list']).rdd.map(list)
 
-                pred_df = predictionAndLabels.select(['itemindex','item_list']).rdd.map(list)
+    #             metrics = RankingMetrics(pred_df)
 
-                metrics = RankingMetrics(pred_df)
+    #             print('Ranking Metrics Calculated!')
+    #             time_b = time.time()
+    #             print(time_b - time_a)
+    #             time_a = time_b
 
-                print('Ranking Metrics Calculated!')
-                time_b = time.time()
-                print(time_b - time_a)
-                time_a = time_b
+    #             eva = metrics.meanAveragePrecision
+    #             result_dict[current_key] = eva
 
-                eva = metrics.meanAveragePrecision
-                result_dict[current_key] = eva
+    #             print(current_key,"parameter combination has been trained! MAP= ", eva)
+    #             time_b = time.time()
+    #             print(time_b - time_a)
+    #             time_a = time_b
 
-                print(current_key,"parameter combination has been trained! MAP= ", eva)
-                time_b = time.time()
-                print(time_b - time_a)
-                time_a = time_b
-
-    best_model_param = max(result_dict, key=result_dict.get)
-    als = ALS(maxIter=5, userCol="userindex", itemCol="itemindex", ratingCol="count", rank=best_model_param[0], regParam=best_model_param[1], alpha=best_model_param[2])
-    als.fit(training_data).write().overwrite().save(model_file)
+    # best_model_param = max(result_dict, key=result_dict.get)
+    # als = ALS(maxIter=5, userCol="userindex", itemCol="itemindex", ratingCol="count", rank=best_model_param[0], regParam=best_model_param[1], alpha=best_model_param[2])
+    # als.fit(training_data).write().overwrite().save(model_file)
 
     print('Process Finished!')
     print(time.time() - start)
