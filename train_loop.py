@@ -61,9 +61,9 @@ def main(spark, train_data_file, test_data_file, model_file):
     time_a = time_b
 
     result_dict = {}
-    rank_list = [10]
-    reg_param_list = [0.1]
-    alpha_list = [1]
+    rank_list = [12,9,5]
+    reg_param_list = [0.2,0.6,0.7]
+    alpha_list = [0.5]
 
     for rank in rank_list:
         for reg_param in reg_param_list:
@@ -93,7 +93,7 @@ def main(spark, train_data_file, test_data_file, model_file):
                 time_b = time.time()
                 print(time_b - time_a)
                 time_a = time_b
-                
+
     #             pred_df = predictionAndLabels.select(['itemindex','item_list']).rdd.map(list)
 
     #             metrics = RankingMetrics(pred_df)
