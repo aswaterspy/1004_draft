@@ -61,9 +61,9 @@ def main(spark, train_data_file, test_data_file, model_file):
     time_a = time_b
 
     result_dict = {}
-    rank_list = [10,20,30,50]
-    reg_param_list = [0.1,0.5]
-    alpha_list = [1,1.5]
+    rank_list = [1000,1500]#[10,20,30,50]
+    reg_param_list = [0.7,0.9]#[0.1,0.5]
+    alpha_list = [1]#[1,1.5]
 
     for rank in rank_list:
         for reg_param in reg_param_list:
