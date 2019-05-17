@@ -17,6 +17,7 @@ from pyspark.ml.recommendation import ALS
 from pyspark.mllib.evaluation import RankingMetrics
 from pyspark.sql.functions import expr
 from pyspark.sql import functions as F
+from pyspark.sql.functions import lit
 # TODO: you may need to add imports here
 
 
@@ -57,7 +58,9 @@ def main(spark, train_data_file, test_data_file, model_file):
     testing_data = testing_data.select('userindex','itemindex','count')
 
     # Add Log Compression
-    training_data = training_data.withColumn("log_count",F.log("count"))
+    training_data.createOrReplaceTempView('training_data')
+    training_data = spark.sql("SELECT *, count+1 as plus_count FROM training_data")
+    training_data = training_data.withColumn("log_count",F.log("plus_count"))
 
     print('Finished Indexing!')
     time_b = time.time()
@@ -66,7 +69,7 @@ def main(spark, train_data_file, test_data_file, model_file):
 
     result_dict = {}
     rank_list = [500,600,700]#[10,20,30,50]
-    reg_param_list = [0.7,0.9]#[0.1,0.5]
+    reg_param_list = [0.7]#[0.1,0.5]
     alpha_list = [1]#[1,1.5]
 
     for rank in rank_list:
@@ -89,7 +92,7 @@ def main(spark, train_data_file, test_data_file, model_file):
                 print('Finished Label DF!')
 
                 predictionAndLabels = prediction.join(testing_df, 'userindex')
-                predandlabel_name = 'log_rk'+str(rank)+'reg'+str(reg_param)+'a'+str(alpha)
+                predandlabel_name = 'logplus_rk'+str(rank)+'reg'+str(reg_param)+'a'+str(alpha)
                 predandlabel_name = predandlabel_name.replace(".","")+'.parquet'
                 predictionAndLabels.write.parquet(predandlabel_name)
 
