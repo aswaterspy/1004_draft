@@ -79,6 +79,8 @@ def main(spark, train_data_file, test_data_file, model_file):
                 als = ALS(maxIter=5, userCol="userindex", itemCol="itemindex", ratingCol="log_count", rank=rank, regParam=reg_param, alpha=alpha)
                 model = als.fit(training_data)
 
+                model.write().overwrite().save(model_file)
+
                 print('Finished Modeling with Param:', current_key)
                 time_b = time.time()
                 print(time_b - time_a)
