@@ -61,11 +61,11 @@ def main(spark, model_file, train_data_file, test_data_file):
     time_a = time_b
 
     eva = metrics.meanAveragePrecision
-    print("Model on Testinf Data gives MAP= ", eva)
+    print("Model on Testing Data gives MAP= ", eva)
 
     print('Process Finished!')
     print(time.time() - start)
-    
+
 # Only enter this block if we're in main
 if __name__ == "__main__":
 
