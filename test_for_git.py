@@ -82,4 +82,4 @@ if __name__ == "__main__":
     test_data_file = sys.argv[3]
 
     # Call our main routine
-    main(spark, model_file, training_data_file, test_data_file)
+    main(spark, model_file, train_data_file, test_data_file)
