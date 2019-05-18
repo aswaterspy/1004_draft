@@ -76,7 +76,7 @@ def main(spark, train_data_file, test_data_file, model_file):
             for alpha in alpha_list:
 
                 current_key = (rank,reg_param,alpha)
-                als = ALS(maxIter=5, userCol="userindex", itemCol="itemindex", ratingCol="log_count", rank=rank, regParam=reg_param, alpha=alpha)
+                als = ALS(maxIter=5, userCol="userindex", itemCol="itemindex", ratingCol="count", rank=rank, regParam=reg_param, alpha=alpha)
                 model = als.fit(training_data)
 
                 model.write().overwrite().save(model_file)
